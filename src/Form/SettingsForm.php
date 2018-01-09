@@ -2,15 +2,16 @@
 
 namespace Drupal\google_calendar\Form;
 
-use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\file\Entity\File;
 
 /**
  * Class TestSettingsForm.
  *
  * @ingroup test
  */
-class SettingsForm extends FormBase {
+class SettingsForm extends ConfigFormBase {
 
   /**
    * Returns a unique string identifying the form.
@@ -32,6 +33,18 @@ class SettingsForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Empty implementation of the abstract submit class.
+
+    $test = "test";
+
+    $secret = $form_state->getValue('client_secret');
+    $file = File::load( $secret[0] );
+    $file->setPermanent();
+    $file->save();
+
+    //Save the uri to settings
+    $this->config('google_calendar.default')
+      ->set('secret_file_uri', $file->getFileUri())
+      ->save();
   }
 
   /**
@@ -46,8 +59,30 @@ class SettingsForm extends FormBase {
    *   Form definition array.
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $form['google_calendar_settings']['#markup'] = 'Settings form for Google Calendar entities. Manage field settings here.';
-    return $form;
+
+    $form['client_secret'] = array(
+      '#type' => 'managed_file',
+      '#title' => t('Upload Client Secret File'),
+      '#upload_location' => 'private://google-calendar/',
+      '#default_value' => "",
+      '#description' => t('Client Secret JSON file.'),
+      '#upload_validators' => array(
+        'file_validate_extensions' => array('json')
+      ),
+    );
+
+
+    return parent::buildForm($form, $form_state);;
   }
 
+  /**
+   * Gets the configuration names that will be editable.
+   *
+   * @return array
+   *   An array of configuration object names that are editable if called in
+   *   conjunction with the trait's config() method.
+   */
+  protected function getEditableConfigNames() {
+    return ['google_calendar.default'];
+  }
 }

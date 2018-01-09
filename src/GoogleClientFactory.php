@@ -17,7 +17,9 @@ class GoogleClientFactory {
   public function get() {
     $client = new Google_Client();
 
-    $client->setAuthConfig( __DIR__ . '/../client_secret.json');
+    $secret_uri = \Drupal::config('google_calendar.default')->get('secret_file_uri');
+    $secret_file = \Drupal::service('file_system')->realpath($secret_uri);
+    $client->setAuthConfig($secret_file);
     $client->setScopes([
       'https://www.googleapis.com/auth/calendar',
       'https://www.googleapis.com/auth/drive',
