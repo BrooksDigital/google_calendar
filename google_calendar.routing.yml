@@ -1,0 +1,13 @@
+google_calendar.import:
+  path: '/admin/google-calendar/calendar/{google_calendar}/import'
+  defaults:
+    _controller: '\Drupal\google_calendar\Controller\GoogleCalendarImportController::ImportCalendar'
+    _title: 'Import Calendar'
+  requirements:
+    _permission: 'manually import calendar events'
+  options:
+    _admin_route: TRUE
+    parameters:
+      google_calendar:
+        type: entity:google_calendar
+

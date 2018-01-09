@@ -1,0 +1,20 @@
+
+# Google Calendar menu items definition
+entity.google_calendar.collection:
+  title: 'Google Calendars'
+  route_name: entity.google_calendar.collection
+  description: 'List Google Calendar entities'
+  parent: system.admin_structure
+  weight: 100
+
+google_calendar.admin.structure.settings:
+  title: Calendar Settings
+  description: 'Calendar Settings'
+  route_name: google_calendar.settings
+  parent: entity.google_calendar.collection
+
+google_calendar_event.admin.structure.settings:
+  title: Event Settings
+  description: 'Events Settings'
+  route_name: google_calendar_event.settings
+  parent: entity.google_calendar.collection

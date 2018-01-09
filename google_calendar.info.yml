@@ -1,0 +1,5 @@
+name: Google Calendar
+type: module
+description: Provides an extensible integration with Google Calendar
+core: 8.x
+package: Calendars
