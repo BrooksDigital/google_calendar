@@ -45,6 +45,8 @@ class SettingsForm extends ConfigFormBase {
     $this->config('google_calendar.default')
       ->set('secret_file_uri', $file->getFileUri())
       ->save();
+
+    drupal_set_message($this->t("Client Secret file uploaded successfully"));
   }
 
   /**

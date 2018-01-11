@@ -24,9 +24,7 @@ use Drupal\user\UserInterface;
  *
  *     "form" = {
  *       "default" = "Drupal\google_calendar\Form\GoogleCalendarEventForm",
- *       "add" = "Drupal\google_calendar\Form\GoogleCalendarEventForm",
  *       "edit" = "Drupal\google_calendar\Form\GoogleCalendarEventForm",
- *       "delete" = "Drupal\google_calendar\Form\GoogleCalendarEventDeleteForm",
  *     },
  *     "access" = "Drupal\google_calendar\GoogleCalendarEventAccessControlHandler",
  *     "route_provider" = {
@@ -46,9 +44,7 @@ use Drupal\user\UserInterface;
  *   },
  *   links = {
  *     "canonical" = "/event/{google_calendar_event}",
- *     "add-form" = "/admin/google-calendar/event/add",
  *     "edit-form" = "/admin/google-calendar/event/{google_calendar_event}/edit",
- *     "delete-form" = "/admin/google-calendar/event/{google_calendar_event}/delete",
  *     "collection" = "/admin/google-calendar/event",
  *   },
  *   field_ui_base_route = "google_calendar_event.settings"

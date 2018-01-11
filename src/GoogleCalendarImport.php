@@ -189,7 +189,8 @@ class GoogleCalendarImport {
         ],
 
         'description' => [
-          'value' => $event['description']
+          'value' => $event['description'],
+          'format' => 'basic_html'
         ],
 
         'location' => [

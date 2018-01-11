@@ -11,10 +11,6 @@ use Drupal\Core\Url;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\google_calendar\Entity\GoogleCalendar;
 
-// Include dependencies
-
-require_once __DIR__ . '/vendor/autoload.php';
-
 /**
  * Implements hook_help().
  */

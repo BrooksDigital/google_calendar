@@ -45,7 +45,7 @@ use Drupal\user\UserInterface;
  *     "status" = "status",
  *   },
  *   links = {
- *     "canonical" = "/admin/google-calendar/calendar/{google_calendar}",
+ *     "canonical" = "/calendar/{google_calendar}",
  *     "add-form" = "/admin/google-calendar/calendar/add",
  *     "edit-form" = "/admin/google-calendar/calendar/{google_calendar}/edit",
  *     "delete-form" = "/admin/google-calendar/calendar/{google_calendar}/delete",
