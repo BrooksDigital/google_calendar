@@ -58,13 +58,13 @@ function google_calendar_entity_operation_alter(&$operations, EntityInterface $e
 
   switch ($info->id()){
     case 'google_calendar':
-      $operations['import'] = array(
+      $operations['import'] = [
         'title' => t('Import Events'),
         'weight' => 15,
-        'url' => Url::fromRoute("google_calendar.import", array(
+        'url' => Url::fromRoute("google_calendar.import", [
           'google_calendar' => $entity->id(),
-        )),
-      );
+        ]),
+      ];
   }
   return $operations;
 }

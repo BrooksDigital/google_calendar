@@ -107,11 +107,11 @@ class ImportForm extends FormBase {
       ];
     }
 
-    $batch = array(
+    $batch = [
       'title' => t('Importing Calendars'),
       'operations' => $operations,
       'finished' => '\Drupal\google_calendar\Form\ImportForm::batchProcessCallback',
-    );
+    ];
 
     return batch_set($batch);
   }

@@ -1,0 +1,58 @@
+diff --git a/google_calendar.module b/google_calendar.module
+index edd46e5..f30dac1 100644
+--- a/google_calendar.module
++++ b/google_calendar.module
+@@ -62,13 +62,13 @@ function google_calendar_entity_operation_alter(&$operations, EntityInterface $e
+ 
+   switch ($info->id()){
+     case 'google_calendar':
+-      $operations['import'] = array(
++      $operations['import'] = [
+         'title' => t('Import Events'),
+         'weight' => 15,
+-        'url' => Url::fromRoute("google_calendar.import", array(
++        'url' => Url::fromRoute("google_calendar.import", [
+           'google_calendar' => $entity->id(),
+-        )),
+-      );
++        ]),
++      ];
+   }
+   return $operations;
+ }
+diff --git a/src/Entity/GoogleCalendarEvent.php b/src/Entity/GoogleCalendarEvent.php
+index 6d1da0b..917404a 100644
+--- a/src/Entity/GoogleCalendarEvent.php
++++ b/src/Entity/GoogleCalendarEvent.php
+@@ -226,11 +226,11 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
+       ->setDescription(t('The calendar this event is part of.'))
+       ->setSetting('target_type', 'google_calendar')
+       ->setSetting('handler', 'default')
+-      ->setDisplayOptions('view', array(
++      ->setDisplayOptions('view', [
+         'label'  => 'hidden',
+         'type'   => 'google_calendar',
+         'weight' => 0,
+-      ))
++      ])
+       ->setDisplayConfigurable('view', TRUE);
+ 
+ 
+diff --git a/src/Form/ImportForm.php b/src/Form/ImportForm.php
+index b4df8a7..03a3846 100644
+--- a/src/Form/ImportForm.php
++++ b/src/Form/ImportForm.php
+@@ -107,11 +107,11 @@ class ImportForm extends FormBase {
+       ];
+     }
+ 
+-    $batch = array(
++    $batch = [
+       'title' => t('Importing Calendars'),
+       'operations' => $operations,
+       'finished' => '\Drupal\google_calendar\Form\ImportForm::batchProcessCallback',
+-    );
++    ];
+ 
+     return batch_set($batch);
+   }

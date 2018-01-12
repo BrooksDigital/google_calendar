@@ -222,11 +222,11 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
       ->setDescription(t('The calendar this event is part of.'))
       ->setSetting('target_type', 'google_calendar')
       ->setSetting('handler', 'default')
-      ->setDisplayOptions('view', array(
+      ->setDisplayOptions('view', [
         'label'  => 'hidden',
         'type'   => 'google_calendar',
         'weight' => 0,
-      ))
+      ])
       ->setDisplayConfigurable('view', TRUE);
 
 
