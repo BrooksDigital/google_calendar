@@ -1,0 +1,16 @@
+{
+  "name": "drupal/google_calendar",
+  "type": "drupal-module",
+  "description": "Provides an extensible integration with Google Calendar",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/google_calendar",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/google_calendar",
+    "source": "http://cgit.drupalcode.org/google_calendar"
+  },
+  "require": {
+    "google/apiclient": "^2.0@dev"
+  }
+}

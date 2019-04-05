@@ -1,0 +1,5 @@
+entity.google_calendar.add_form:
+  route_name: entity.google_calendar.add_form
+  title: 'Add Google Calendar'
+  appears_on:
+    - entity.google_calendar.collection
