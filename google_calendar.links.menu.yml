@@ -7,6 +7,14 @@ entity.google_calendar.collection:
   parent: system.admin_structure
   weight: 100
 
+# Google Calendar menu items definition
+entity.google_calendar.import:
+  title: 'Google Calendar Import'
+  route_name: google_calendar.import_calendars
+  description: 'List Google Calendar entities that can be imported'
+  parent: system.admin_structure
+  weight: 99
+
 google_calendar.admin.structure.settings:
   title: Calendar Settings
   description: 'Calendar Settings'

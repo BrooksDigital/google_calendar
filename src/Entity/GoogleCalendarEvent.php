@@ -162,7 +162,7 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
       ])
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete',
-        'weight' => 5,
+        'weight' => 0,
         'settings' => [
           'match_operator' => 'CONTAINS',
           'size' => '60',
@@ -177,18 +177,18 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
       ->setLabel(t('Name'))
       ->setDescription(t('The name of the event. This field is read-only, and should be changed in Google Calendar.'))
       ->setSettings([
-        'max_length' => 50,
+        'max_length' => 128,
         'text_processing' => 0,
       ])
       ->setDefaultValue('')
       ->setDisplayOptions('view', [
         'label' => 'above',
         'type' => 'string',
-        'weight' => -4,
+        'weight' => 0,
       ])
       ->setDisplayOptions('form', [
         'type' => 'string_textfield',
-        'weight' => -4
+        'weight' => 0,
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
@@ -204,17 +204,34 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
       ->setDisplayOptions('view', [
         'label' => 'above',
         'type' => 'string',
-        'weight' => -4,
+        'weight' => 0,
       ])
       ->setDisplayOptions('form', [
         'type' => 'string_textfield',
-        'weight' => -4,
+        'weight' => 0,
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['event_id'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Event ID'))
+      ->setDescription(t('The Google created unique ID for this event. Unique even for recurring instances.'))
+      ->setReadOnly(TRUE);
+
+    $fields['ical_id'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('iCal ID'))
+      ->setDescription(t('The Google created iCal ID for this event. Not unique for recurring instances.'))
+      ->setReadOnly(TRUE);
+
+    $fields['google_link'] = BaseFieldDefinition::create('link')
+      ->setLabel(t('Google Link'))
+      ->setDescription(t('External link to the event in its Google Calendar.'))
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'link',
+        'weight' => 0,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
       ->setReadOnly(TRUE);
 
     $fields['calendar'] = BaseFieldDefinition::create('entity_reference')
@@ -222,35 +239,32 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
       ->setDescription(t('The calendar this event is part of.'))
       ->setSetting('target_type', 'google_calendar')
       ->setSetting('handler', 'default')
-      ->setDisplayOptions('view', [
+      ->setDisplayOptions('view', array(
         'label'  => 'hidden',
         'type'   => 'google_calendar',
         'weight' => 0,
-      ])
+      ))
       ->setDisplayConfigurable('view', TRUE);
-
-
 
     $fields['description'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Description'))
-      ->setDescription(t('This field is read-only, and should be changed in Google Calendar.'))
+      ->setDescription(t('Long form description of the event.'))
       ->setSettings([
-        'max_length' => 50,
+        'max_length' => 255,
         'text_processing' => 0,
       ])
       ->setDefaultValue('')
       ->setDisplayOptions('view', [
         'label' => 'above',
         'type' => 'text_default',
-        'weight' => -4,
+        'weight' => 0,
       ])
       ->setDisplayOptions('form', [
         'type' => 'text_textarea',
-        'weight' => -4,
+        'weight' => 0,
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
-
 
     $fields['start_date'] = BaseFieldDefinition::create('timestamp')
       ->setLabel(t('Start Date'))
@@ -283,18 +297,131 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
+    $fields['end_unspecified'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('End Unspecified'))
+      ->setDescription(t('A boolean indicating that the end date/time was not specified.'))
+      ->setReadOnly(TRUE)
+      ->setDefaultValue(FALSE);
+
+    $fields['etag'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Tag'))
+      ->setDescription(t('A tag value.'))
+      ->setReadOnly(TRUE)
+      ->setDefaultValue('');
+
+    $fields['guests_invite_others'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Can guests invite others'))
+      ->setDescription(t('A boolean indicating that someone other than the owner of the event can invite people.'))
+      ->setReadOnly(TRUE)
+      ->setDefaultValue(FALSE);
+
+    $fields['guests_modify'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Can guests edit'))
+      ->setDescription(t('A boolean indicating that someone other than the owner of the event change it.'))
+      ->setReadOnly(TRUE)
+      ->setDefaultValue(FALSE);
+
+    $fields['guests_see_invitees'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Can guests view guest list'))
+      ->setDescription(t('A boolean indicating that guests can see who else is invited.'))
+      ->setReadOnly(TRUE)
+      ->setDefaultValue(FALSE);
+
+    $fields['locked'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Locked status'))
+      ->setDescription(t('A boolean indicating that the Google Calendar Event is locked.'))
+      ->setReadOnly(TRUE)
+      ->setDefaultValue(TRUE);
+
+    $fields['transparency'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Transparency'))
+      ->setSetting('allowed_values', [
+        'opaque' => 'Opaque',
+        'transparent' => 'Transparent',
+      ])
+      ->setDescription(t('A boolean indicating whether the event blocks time in the calendar.'))
+      ->setReadOnly(TRUE)
+      ->setDefaultValue(TRUE);
+
+    $fields['visibility'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Event visibility'))
+      ->setSetting('allowed_values', [
+        'default' => 'Default',
+        'public' => 'Public',
+        'private' => 'Private',
+        'confidential' => 'Confidential',
+      ])
+      ->setDescription(t('Whether this event is public or private.'))
+      ->setReadOnly(TRUE)
+      ->setDefaultValue('default');
+
+    $fields['state'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('State'))
+      ->setSetting('allowed_values', [
+        'tentative' => 'Tentative',
+        'confirmed' => 'Confirmed',
+        'cancelled' => 'Cancelled',
+      ])
+      ->setDescription(t('Whether this event is public or private.'))
+      ->setReadOnly(TRUE)
+      ->setDefaultValue(TRUE);
+
     $fields['status'] = BaseFieldDefinition::create('boolean')
       ->setLabel(t('Publishing status'))
       ->setDescription(t('A boolean indicating whether the Google Calendar Event is published.'))
       ->setDefaultValue(TRUE);
 
-    $fields['created'] = BaseFieldDefinition::create('created')
+    $fields['created'] = BaseFieldDefinition::create('timestamp')
       ->setLabel(t('Created'))
-      ->setDescription(t('The time that the entity was created.'));
+      ->setDescription(t('The time that the entity was created.'))
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'timestamp',
+        'weight' => -4,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'datetime_timestamp',
+        'weight' => -4,
+      ])
+      ->setReadOnly(TRUE);
 
-    $fields['changed'] = BaseFieldDefinition::create('changed')
-      ->setLabel(t('Changed'))
-      ->setDescription(t('The time that the entity was last edited.'));
+    $fields['creator'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Event creator'))
+      ->setDescription(t('Name of event creator.'))
+      ->setReadOnly(TRUE)
+      ->setDefaultValue('');
+
+    $fields['creator_email'] = BaseFieldDefinition::create('email')
+      ->setLabel(t('Event creator email'))
+      ->setDescription(t('Email of event creator.'))
+      ->setReadOnly(TRUE)
+      ->setDefaultValue('');
+
+    $fields['organizer'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Event organizer'))
+      ->setDescription(t('Name of event organizer.'))
+      ->setReadOnly(TRUE)
+      ->setDefaultValue('');
+
+    $fields['organizer_email'] = BaseFieldDefinition::create('email')
+      ->setLabel(t('Event organizer email'))
+      ->setDescription(t('Email of event organizer.'))
+      ->setReadOnly(TRUE)
+      ->setDefaultValue('');
+
+    $fields['updated'] = BaseFieldDefinition::create('timestamp')
+      ->setLabel(t('Updated'))
+      ->setDescription(t('The time that the entity was last edited.'))
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'timestamp',
+        'weight' => -4,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'datetime_timestamp',
+        'weight' => -4,
+      ])
+      ->setReadOnly(TRUE);
 
     return $fields;
   }

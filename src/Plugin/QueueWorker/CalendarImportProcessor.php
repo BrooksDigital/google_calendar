@@ -43,7 +43,7 @@ class CalendarImportProcessor extends QueueWorkerBase implements ContainerFactor
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
-      $container->get('google_calendar.import')
+      $container->get('google_calendar.import_events')
     );
   }
 

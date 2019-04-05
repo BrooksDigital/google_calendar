@@ -689,7 +689,51 @@ display:
             description__value: description__value
             location: location
           plugin_id: combine
-      sorts: {  }
+      sorts:
+        start_date:
+          id: start_date
+          table: google_calendar_event
+          field: start_date
+          relationship: none
+          group_type: group
+          admin_label: ''
+          order: ASC
+          exposed: true
+          expose:
+            label: 'Start Date'
+          granularity: second
+          entity_type: google_calendar_event
+          entity_field: start_date
+          plugin_id: date
+        name:
+          id: name
+          table: google_calendar_event
+          field: name
+          relationship: none
+          group_type: group
+          admin_label: ''
+          order: ASC
+          exposed: true
+          expose:
+            label: Name
+          entity_type: google_calendar_event
+          entity_field: name
+          plugin_id: standard
+        updated:
+          id: updated
+          table: google_calendar_event
+          field: updated
+          relationship: none
+          group_type: group
+          admin_label: ''
+          order: ASC
+          exposed: true
+          expose:
+            label: Updated
+          granularity: minute
+          entity_type: google_calendar_event
+          entity_field: updated
+          plugin_id: date
       title: 'Google Calendar Events'
       header:
         area_text_custom:
@@ -750,12 +794,14 @@ display:
           plugin_id: numeric
       display_extenders: {  }
     cache_metadata:
-      max-age: 0
+      max-age: -1
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url
         - url.query_args
+        - 'url.query_args:sort_by'
+        - 'url.query_args:sort_order'
         - user.permissions
       tags: {  }
   calendar_list:
@@ -767,11 +813,13 @@ display:
       display_extenders: {  }
       path: admin/google-calendar/calendar/%google_calendar/events
     cache_metadata:
-      max-age: 0
+      max-age: -1
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url
         - url.query_args
+        - 'url.query_args:sort_by'
+        - 'url.query_args:sort_order'
         - user.permissions
       tags: {  }
