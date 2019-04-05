@@ -11,7 +11,7 @@
     "source": "https://git.ivimey.org/rivimey/google_calendar"
   },
   "require": {
-    "google/apiclient": "^2.0@dev",
+    "google/apiclient": "^2.0@dev"
   },
   "authors": [
     {
