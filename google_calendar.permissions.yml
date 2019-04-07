@@ -38,5 +38,5 @@ view published google calendar events:
 view unpublished google calendar events:
   title: 'View unpublished Google Calendar Events'
 
-manually import calendar events:
-  title: 'Manually import event from google Calendars'
+manually sync calendar events:
+  title: 'Manually synchronise events with Google Calendars'
