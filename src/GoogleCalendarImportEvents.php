@@ -24,6 +24,20 @@ use DateTimeZone;
 class GoogleCalendarImportEvents {
 
   /**
+   * @var int stats
+   */
+  protected $modify_events = 0;
+  protected $saved_events = 0;
+  protected $created_events = 0;
+  protected $page_count = 0;
+  protected $new_events = 0;
+
+  /**
+   * @var int Maximum pages to import at once.
+   */
+  protected $maxPages = 2;
+
+  /**
    * Google Calendar service definition.
    *
    * @var \Google_Service_Calendar
@@ -48,7 +62,11 @@ class GoogleCalendarImportEvents {
    */
   protected $entityTypeManager;
 
-  protected $maxPages = 2;
+  public function getStatNewEvents() { return $this->new_events; }
+  public function getStatModifyEvents() { return $this->modify_events; }
+  public function getStatCreatedEvents() { return $this->created_events; }
+  public function getStatSavedEvents() { return $this->saved_events; }
+  public function getStatPageCount() { return $this->page_count; }
 
   /**
    * GoogleCalendarImport constructor.
@@ -63,11 +81,8 @@ class GoogleCalendarImportEvents {
                               LoggerChannelFactoryInterface $loggerChannelFactory) {
 
     $this->service = new Google_Service_Calendar($googleClient);
-
     $this->config = $config->getEditable('google_calendar.last_imports');
-
     $this->entityTypeManager = $entityTypeManager;
-
     $this->logger = $loggerChannelFactory->get('google_calendar');
   }
 
@@ -81,8 +96,15 @@ class GoogleCalendarImportEvents {
 
     // init dummy page token
     $nextPageToken = NULL;
+    // Stats
+    $this->new_events = 0;
+    $this->modify_events = 0;
+    $this->saved_events = 0;
+    $this->created_events = 0;
 
-    $pageCount = 0;
+    // Page count limit.
+    $this->pageCount = 0;
+
     do {
       $page = $this->getPage($calendarId, $syncToken, $nextPageToken);
 
@@ -96,8 +118,8 @@ class GoogleCalendarImportEvents {
       if (count($items) > 0) {
         $this->syncEvents($items, $calendar, $googleCalendar->getTimeZone());
       }
-      $pageCount++;
-    } while ($nextPageToken && $pageCount < $this->maxPages);
+      $this->pageCount++;
+    } while ($nextPageToken && $this->pageCount < $this->maxPages);
 
     //set sync token
     $this->config->set($configKey, $nextSyncToken);
@@ -107,28 +129,39 @@ class GoogleCalendarImportEvents {
       '@calendar' => $calendar->label()
     ]);
 
-    return TRUE;
+    return $calendar;
   }
 
+  /**
+   * Request a page of calendar events for a calendar-id
+   *
+   * @param string $calendarId
+   *   Calendar identifier.
+   * @param string $syncToken
+   *   Token obtained from the nextSyncToken field returned on the last page of
+   *   results from the previous list request.
+   * @param string $pageToken
+   *   Token specifying which result page to return. Optional.
+   *
+   * @return bool|\Google_Service_Calendar_Events
+   *
+   * @see https://developers.google.com/calendar/v3/reference/events/list
+   */
   private function getPage($calendarId, $syncToken, $pageToken = NULL) {
+
+    // also 'showDeleted', 'q', 'timeMax', 'timeZone', 'updatedMin', 'maxResults'.
+    // default maxResults is 250 per page.
+
     $opts = [
       'pageToken' => $pageToken,
-      'singleEvents' => TRUE,
-//        'fields' => 'nextPageToken,nextSyncToken,items('
-//            .'id,status,summary,description,notes'
-//            .',location,start,end,attachments'
-//            .',recurrence,recurringEventId,transparency,attendees,conference'
-//            .',htmlLink,endTimeUnspecified,guestsCanInviteOthers,guestsCanModify'
-//            .',guestsCanSeeOtherGuests,privateCopy,locked,reminders'
-//            .',creator,organizer,extendedProperties'
-//          .')'
+      'singleEvents' => TRUE,  // expand recurring events into instances.
     ];
 
     if ($syncToken) {
       $opts['syncToken'] = $syncToken;
     }
     else {
-      $opts['orderBy'] = 'startTime';
+      $opts['orderBy'] = 'startTime';  // or 'updated'; 'startTime' requires 'singleEvents'=true
       $opts['timeMin'] = date(DateTime::RFC3339, strtotime("-1 day"));
     }
 
@@ -146,9 +179,19 @@ class GoogleCalendarImportEvents {
     }
 
     return $response;
-
   }
 
+  /**
+   * Given a list of events, add or update the corresponding Calendar Entities.
+   *
+   * @param \Google_Service_Calendar_Event[] $events
+   * @param GoogleCalendar $calendar
+   * @param string $timezone
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
   private function syncEvents($events, $calendar, $timezone) {
 
     // Get list of event Ids
@@ -156,7 +199,7 @@ class GoogleCalendarImportEvents {
     foreach ($events as $event) {
       $eventIds[] = $event['id'];
     }
-    $new_events = count($eventIds);
+    $this->new_events += count($eventIds);
 
     /** @var \Drupal\Core\Entity\EntityStorageInterface $storage */
     $storage = $this->entityTypeManager
@@ -177,9 +220,7 @@ class GoogleCalendarImportEvents {
       $indexedEvents[$event->getGoogleEventId()] = $event;
     }
 
-    $modify_events = count($indexedEvents);
-    $saved_events = 0;
-    $created_events = 0;
+    $this->modify_events = +count($indexedEvents);
 
     // Iterate over events and update Drupal nodes accordingly
     foreach ($events as $event) {
@@ -345,27 +386,27 @@ class GoogleCalendarImportEvents {
 
       if (!$eventEntity) {
         $eventEntity = GoogleCalendarEvent::create($fields);
-        $created_events++;
+        $this->created_events++;
       }
       else {
         // Update the existing node in place
         foreach ($fields as $key => $value) {
           $eventEntity->set($key, $value);
         }
-        $saved_events++;
+        $this->saved_events++;
       }
 
       // Save it!
       $eventEntity->save();
     }
 
-    $this->logger->info("Sync @calendar: @new_events fetched from Google, @created_events created, @modify_events to update and @saved_events updated.",
+    $this->logger->info('Sync "@calendar": @new_events fetched, @created_events created, @modify_events to update and @saved_events updated.',
                         [
-                          '@calendar' => $calendar->label(),
-                          '@new_events' => $new_events,
-                          '@modify_events' => $modify_events,
-                          '@created_events' => $created_events,
-                          '@saved_events' => $saved_events,
+                          '@calendar' => $calendar->getName(),
+                          '@new_events' => $this->new_events,
+                          '@modify_events' => $this->modify_events,
+                          '@created_events' => $this->created_events,
+                          '@saved_events' => $this->saved_events,
                         ]);
   }
 

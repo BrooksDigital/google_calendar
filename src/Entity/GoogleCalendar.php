@@ -132,8 +132,87 @@ class GoogleCalendar extends ContentEntityBase implements GoogleCalendarInterfac
     return $this;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getGoogleCalendarId(){
     return $this->get('calendar_id')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDescription(){
+    return $this->get('description')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setDescription(string $desc){
+    $this->set('description', $desc);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLocation(){
+    return $this->get('location')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setLocation(string $locn){
+    $this->set('location', $locn);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSyncResult(){
+    return $this->get('sync_result')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setSyncResult(string $result){
+    $this->set('sync_result', $result);
+    return $this;
+  }
+
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLatestEventTime() {
+    return $this->get('latest_event')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setLatestEventTime($timestamp) {
+    $this->set('latest_event', $timestamp);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLastSyncTime() {
+    return $this->get('last_checked')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setLastSyncTime($timestamp) {
+    $this->set('last_checked', $timestamp);
+    return $this;
   }
 
   /**
@@ -162,9 +241,49 @@ class GoogleCalendar extends ContentEntityBase implements GoogleCalendarInterfac
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
+    $fields['description'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Description'))
+      ->setDescription(t('The description of the Google Calendar entity.'))
+      ->setSettings([
+        'max_length' => 255,
+        'text_processing' => 0,
+      ])
+      ->setDefaultValue('')
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'string',
+        'weight' => 0,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'string_textfield',
+        'weight' => 0,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
+    $fields['location'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Location'))
+      ->setDescription(t('The (default) location of the Google Calendar entity.'))
+      ->setSettings([
+        'max_length' => 255,
+        'text_processing' => 0,
+      ])
+      ->setDefaultValue('')
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'string',
+        'weight' => 0,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'string_textfield',
+        'weight' => 0,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
     $fields['calendar_id'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Google Calendar ID'))
-      ->setDescription(t('The ID of the calendar in google. This can be obtained "
+      ->setDescription(t('The Google ID of the calendar. This can be obtained "
           ."from the "Integrate Calendar" section of your calendar\'s settings.'))
       ->setSettings([
         'max_length' => 255,
@@ -188,13 +307,25 @@ class GoogleCalendar extends ContentEntityBase implements GoogleCalendarInterfac
       ->setDescription(t('A boolean indicating whether the Google Calendar is published.'))
       ->setDefaultValue(TRUE);
 
+    $fields['sync_result'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Sync Result'))
+      ->setDescription(t('Report status of the last sync with Google.'));
+
+    $fields['last_checked'] = BaseFieldDefinition::create('timestamp')
+      ->setLabel(t('Last Checked'))
+      ->setDescription(t('The most recent time that calendar events were synced with Google.'));
+
+    $fields['latest_event'] = BaseFieldDefinition::create('timestamp')
+      ->setLabel(t('Latest Event'))
+      ->setDescription(t('The time that events were last updated in a sync.'));
+
     $fields['created'] = BaseFieldDefinition::create('created')
       ->setLabel(t('Created'))
-      ->setDescription(t('The time that the entity was created.'));
+      ->setDescription(t('The time that the calendar was created.'));
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
-      ->setDescription(t('The time that the entity was last edited.'));
+      ->setDescription(t('The time that the calendar was last edited.'));
 
     return $fields;
   }

@@ -12,8 +12,8 @@ services:
     class: Google_Client
     factory: google_calendar.google_client.factory:get
 
-  google_calendar.import_calendars:
-    class: Drupal\google_calendar\GoogleCalendarImportCalendars
+  google_calendar.import_calendar:
+    class: Drupal\google_calendar\GoogleCalendarImportCalendar
     arguments: ['@google_calendar.google_client', '@config.factory', '@entity_type.manager', '@logger.factory']
 
   google_calendar.import_events:

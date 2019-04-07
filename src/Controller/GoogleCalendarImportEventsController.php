@@ -3,6 +3,7 @@
 namespace Drupal\google_calendar\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\google_calendar\GoogleCalendarImportEvents;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\google_calendar\GoogleCalendarImport;
 use Drupal\google_calendar\Entity\GoogleCalendarInterface;
@@ -15,14 +16,14 @@ class GoogleCalendarImportEventsController extends ControllerBase {
   /**
    * Drupal\google_calendar\GoogleCalendarImport definition.
    *
-   * @var \Drupal\google_calendar\GoogleCalendarImport
+   * @var \Drupal\google_calendar\GoogleCalendarImportEvents
    */
   protected $googleCalendarImport;
 
   /**
    * Constructs a new GoogleCalendarImportEventsController object.
    */
-  public function __construct(GoogleCalendarImport $google_calendar_import) {
+  public function __construct(GoogleCalendarImportEvents $google_calendar_import) {
     $this->googleCalendarImport = $google_calendar_import;
   }
 
@@ -45,7 +46,7 @@ class GoogleCalendarImportEventsController extends ControllerBase {
     $this->googleCalendarImport->import($google_calendar);
 
     drupal_set_message($this->t('Events for the <strong>@calendar</strong> Calendar have been imported successfully!', [
-      '@calendar' => $google_calendar->label()
+      '@calendar' => $google_calendar->getName()
     ]));
 
     return $this->redirect('entity.google_calendar.collection');
