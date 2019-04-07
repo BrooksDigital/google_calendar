@@ -4,6 +4,7 @@ namespace Drupal\google_calendar\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
  * Form controller for Google Calendar import forms.
@@ -30,31 +31,31 @@ class GoogleCalendarImportCalendarsForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    /* @var $entity \Drupal\google_calendar\Entity\GoogleCalendar */
-    $form = parent::buildForm($form, $form_state);
 
+    /** @var GoogleClientFactory $client_factory */
+    $client_factory = \Drupal::service('google_calendar.google_client.factory');
+    /** @var \Google_Client $client */
+    $client = $client_factory->get();
+
+    $service = new \Google_Service_Calendar($client);
+
+    $index = [];
     $entities = \Drupal::entityTypeManager()
       ->getStorage('google_calendar')
       ->loadByProperties(['status' => 1]);
     foreach ($entities as $entity) {
-      $index[$entity->id()] = $entity->id();
+      $index[$entity->getGoogleCalendarId()] = $entity;
     }
     $imported = [];
     $toimport = [];
+    $orphaned = [];
 
-    $list = $this->service->calendarList->listCalendarList();
+    $list = $service->calendarList->listCalendarList();
 
     $items = $list->getItems();
+
     /** @var \Google_Service_Calendar_CalendarListEntry $calendar */
     foreach ($items as $calendar) {
-//      $cal = [
-//        'id' => $calendar->getId(),
-//        'primary' => $calendar->getPrimary() ? 'Yes' : 'No',
-//        'name' => $calendar->getSummary(),
-//        'desc' => $calendar->getDescription(),
-//        'locn' => $calendar->getLocation(),
-//        'colour' => $calendar->getForegroundColor() . ' on ' . $calendar->getBackgroundColor(),
-//      ];
       if (array_key_exists($calendar->getId(), $index)) {
         $imported[] = $calendar->getId();
       }
@@ -63,59 +64,94 @@ class GoogleCalendarImportCalendarsForm extends FormBase {
       }
     }
 
-    $form['table'] = [
-      '#type' => 'table',
-      '#header' => [
-        $this->t('Name'),
-        $this->t('Status'),
-        $this->t('Operations'),
-      ],
-      '#empty' => $this->t('No calendars are available.'),
-    ];
+    // Check to see if any current entities are no longer visible in
+    // the calendar api (e.g. they have been unshared).
+    foreach ($entities as $entity) {
+      $eid = $entity->getGoogleCalendarId();
+      $found = FALSE;
+      foreach ($items as $calendar) {
+        if ($eid === $calendar->getId()) {
+          $found = TRUE;
+        }
+      }
+      if (!$found) {
+        $orphaned[] = $eid;
+      }
+    }
+
+    $rows = [];
     foreach ($items as $calendar) {
       $id = $calendar->getId();
       /* Build Status */
-      if (isset($imported[$id])) {
-        $status = t('Imported');
+      if (in_array($id, $imported, TRUE)) {
+        $status = $this->t('Imported as @name', ['@name' => $index[$id]->link()]);
       }
-      elseif (isset($toimport[$id])) {
-        $status = t('Not Imported');
+      elseif (in_array($id, $toimport, TRUE)) {
+        $status = $this->t('Not Imported');
+      }
+      elseif (in_array($id, $orphaned, TRUE)) {
+        $status = $this->t('Not Longer Available');
       }
       else {
-        $status = t('Not Known');
+        $status = $this->t('Unknown');
       }
 
       /* Build links */
       $links = [];
-      $links['import'] = [
-        'title' => t('Import Calendar'),
-        'url' => Url::fromRoute('google_calendar.calendar_import', ['calendar' => $calendar->getId()]),
-      ];
-      $links['drop'] = [
-        'title' => t('Drop Calendar'),
-        'url' => Url::fromRoute('google_calendar.calendar_drop', ['calendar' => $calendar->getId()]),
-      ];
+      if (in_array($id, $toimport, TRUE)) {
+        $links['import'] = [
+          'title' => $this->t('Import Calendar'),
+          'url' => Url::fromRoute('google_calendar.import_calendar',
+                                  ['calendar_id' => $id]),
+        ];
+      }
+      elseif (in_array($id, $imported, TRUE)) {
+        $links['sync'] = [
+          'title' => $this->t('Sync Events'),
+          'url' => Url::fromRoute('google_calendar.import_events',
+                                  ['google_calendar' => $index[$id]->id()]),
+        ];
+      }
 
       // Build the table row.
       $row = [];
-      /* Name */
-      $row[] = $calendar->getSummary();
-      /* Status */
-      $row[] = $status;
-      /* Operations */
-      $row[] = [
-        'data' => [
-          '#type' => 'operations',
-          '#links' => $links,
-        ],
+
+      /* Cell: Name */
+      $row['name']['data'] = [
+        '#type' => 'markup',
+        '#markup' => $calendar->getSummary()
+      ];
+
+      /* Cell: Description */
+      $row['desc']['data'] = [
+        '#type' => 'markup',
+        '#markup' => mb_strimwidth($calendar->getDescription(),0,40, '...')
+      ];
+
+      /* Cell: Status */
+      $row['status']['data'] = [
+        '#type' => 'markup',
+        '#markup' => $status
+      ];
+
+      /* Cell: Operations */
+      $row['operations']['data'] = [
+        '#type' => 'operations',
+        '#links' => $links,
       ];
       $rows[] = $row;
     }
-//
-//    $form['actions']['submit'] = [
-//      '#type' => 'submit',
-//      '#value' => t('Import Calendars'),
-//    ];
+    $form['table'] = [
+      '#type' => 'table',
+      '#header' => [
+        $this->t('Name'),
+        $this->t('Description'),
+        $this->t('Status'),
+        $this->t('Operations'),
+      ],
+      '#rows' => $rows,
+      '#empty' => $this->t('No calendars are available.'),
+    ];
 
     return $form;
   }

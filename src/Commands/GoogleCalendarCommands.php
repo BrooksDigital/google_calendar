@@ -187,7 +187,7 @@ class GoogleCalendarCommands extends DrushCommands {
    */
   public function import($calendar_id): PropertyList {
     $pl = [];
-    /** @var \Drupal\google_calendar\GoogleCalendarImport $importer */
+    /** @var \Drupal\google_calendar\GoogleCalendarImportEvents $importer */
     $importer = \Drupal::service('google_calendar.import_events');
 
     if ($calendar_id) {
@@ -207,13 +207,15 @@ class GoogleCalendarCommands extends DrushCommands {
 
     if (is_array($entities)) {
       foreach ($entities as $entity) {
-        drush_print(t('Updating calendar @cal: @label', ['@cal' => $entity->id(), '@label' => $entity->label()]));
+        drush_print(t('Updating calendar entity @label(@cal)',
+                      ['@cal' => $entity->id(), '@label' => $entity->getName()]));
         $result = $importer->import($entity);
         if ($result) {
-          $pl['imported']++;
+          $pl['imported'] += $importer->getStatSavedEvents();
+          $pl['updated'] += $importer->getStatModifyEvents();
         }
         else {
-          drush_print(t('Update failed.'));
+          drush_print(t('... Update failed.'));
           $pl['failed']++;
         }
       }
