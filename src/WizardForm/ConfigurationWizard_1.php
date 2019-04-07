@@ -36,7 +36,7 @@ class ConfigurationWizard_1 extends ConfigurationWizardBase {
     $output .= '<ol>';
     $output .= '<li><p>' . t('<strong>Create or assign a Google Account</strong> that can be used by the website.') . '</p></li>';
     $output .= '<li><p>' . t('<strong>Create a Google "project" with the account</strong> to represent your website.') . '</p></li>';
-    $output .= '<li><p>' . t('<strong>Enable the Calendar Google APIs</strong> for the nominated google account.') . '</p></li>';
+    $output .= '<li><p>' . t('<strong>Enable the Calendar Google APIs</strong> for the nominated Google account.') . '</p></li>';
     $output .= '<li><p>' . t('<strong>Create a Google Service Account</strong> to represent the website in sharing calendar details.') . '</p></li>';
     $output .= '<li><p>' . t('<strong>Share the calendars with the service account</strong> for each calendar you wish to use.') . '</p></li>';
     $output .= '<li><p>' . t('<strong>Import the API credentials file</strong> into the website.') . '</p></li>';

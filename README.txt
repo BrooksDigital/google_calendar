@@ -25,7 +25,7 @@ and all the other things that make Drupal Entities so excellent to work with.
 
 The module creates two new entity types - one for Calendars as a whole, and
 one for Events (entries) in those Calendars. Each Calendar has a name which
-can be, but does not have to be, the name of the calendar in the google web
+can be, but does not have to be, the name of the calendar in the Google web
 view.
 
 To import calendar entries, the appropriate authentication process must be

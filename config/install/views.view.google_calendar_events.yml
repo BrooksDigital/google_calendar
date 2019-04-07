@@ -8,7 +8,7 @@ dependencies:
 id: google_calendar_events
 label: 'Google Calendar Events'
 module: views
-description: 'Lists events imported from google calendars'
+description: 'Lists events imported from Google calendars'
 tag: ''
 base_table: google_calendar_event
 base_field: id
