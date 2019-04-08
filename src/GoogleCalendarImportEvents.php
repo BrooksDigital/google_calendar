@@ -105,6 +105,8 @@ class GoogleCalendarImportEvents {
     // Page count limit.
     $this->pageCount = 0;
 
+    $calendar->preImport($calendarId, $this);
+
     do {
       $page = $this->getPage($calendarId, $syncToken, $nextPageToken);
 
@@ -123,6 +125,8 @@ class GoogleCalendarImportEvents {
 
     //set sync token
     $this->config->set($configKey, $nextSyncToken);
+
+    $calendar->postImport($calendarId, $this);
     $this->config->save();
 
     $this->logger->info("Calendar: @calendar imported successfully.", [

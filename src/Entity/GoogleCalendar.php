@@ -2,6 +2,7 @@
 
 namespace Drupal\google_calendar\Entity;
 
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
@@ -213,6 +214,18 @@ class GoogleCalendar extends ContentEntityBase implements GoogleCalendarInterfac
   public function setLastSyncTime($timestamp) {
     $this->set('last_checked', $timestamp);
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preImport(string $calendarId, GoogleCalendarImportEvents $calendarImportEvents) {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function postImport(string $calendarId, GoogleCalendarImportEvents $calendarImportEvents) {
   }
 
   /**
