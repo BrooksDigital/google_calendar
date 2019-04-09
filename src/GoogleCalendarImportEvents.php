@@ -170,8 +170,8 @@ class GoogleCalendarImportEvents {
       $items = $page->getItems();
       if (count($items) > 0) {
         $this->syncEvents($items, $calendar, $googleCalendar->getTimeZone());
+        $this->pageCount++;
       }
-      $this->pageCount++;
     } while ($nextPageToken && $this->pageCount < $this->maxPages);
 
     //set sync token
