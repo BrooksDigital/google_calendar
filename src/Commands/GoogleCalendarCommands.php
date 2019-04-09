@@ -2,6 +2,7 @@
 
 namespace Drupal\google_calendar\Commands;
 
+use Consolidation\OutputFormatters\StructuredData\UnstructuredListData;
 use Drupal\google_calendar\GoogleClientFactory;
 use Drush\Commands\DrushCommands;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
@@ -50,6 +51,9 @@ class GoogleCalendarCommands extends DrushCommands {
    *
    * @command gcal:listCalendars
    * @aliases gcal:lc, gcal-lc
+   *
+   * @option raw
+   *   Return the data in the form supplied by Google.
    *
    * @field-labels
    *   id: ID
@@ -104,26 +108,28 @@ class GoogleCalendarCommands extends DrushCommands {
    *   locn: Location
    *   start: Start Date
    *   end: End Date
+   * @option raw
+   *   Return the data in the form supplied by Google.
    * @option limit
    *   Restrict the output to this many events. If not specified, limit to 20.
    *
    * @command gcal:listEvents
    * @aliases gcal:lev,gcal-lev
    *
-   * @return \Consolidation\OutputFormatters\StructuredData\RowsOfFields
+   * @return RowsOfFields|UnstructuredListData
    *   Table of events.
    *
    * @throws \Exception
    *   Exception if the Start or End dates are badly defined.
    */
-  public function eventList($calendar_id, $event_id = NULL, $options = ['format' => 'table', 'limit' => 20]): RowsOfFields {
+  public function eventList($calendar_id, $event_id = NULL, $options = ['format' => 'table', 'limit' => 20, 'raw' => FALSE]) {
     /** @var GoogleClientFactory $client_factory */
     $client_factory = \Drupal::service('google_calendar.google_client.factory');
     $client = $client_factory->get();
 
     $service = new \Google_Service_Calendar($client);
     $optParams = array(
-      'maxResults' => $options['limit'],
+      'maxResults' => is_numeric($options['limit']) ?: 20,
       'orderBy' => 'startTime',
       'singleEvents' => TRUE,
       'timeMin' => date('c'),  // only future events
@@ -131,13 +137,19 @@ class GoogleCalendarCommands extends DrushCommands {
 
     if ($event_id) {
       $event = $service->events->get($calendar_id, $event_id, []);
-      print_r($event);
+      if ($options['raw']) {
+        return new UnstructuredListData($event);
+      }
       $result[] = $this->formatEvent($event);
     }
     else {
       $list = $service->events->listEvents($calendar_id, $optParams);
-      /** @var \Google_Service_Calendar_Events $items */
+      /** @var \Google_Service_Calendar_Events $items[] */
       $items = $list->getItems();
+      print_r($items);
+      if ($options['raw']) {
+        return new UnstructuredListData($items);
+      }
       $result = [];
       /** @var \Google_Service_Calendar_Event $event */
       foreach ($items as $event) {
