@@ -94,11 +94,32 @@ class GoogleCalendarImportEvents {
    */
   protected $entityTypeManager;
 
-  public function getStatNewEvents() { return $this->new_events; }
-  public function getStatModifyEvents() { return $this->modify_events; }
-  public function getStatCreatedEvents() { return $this->created_events; }
-  public function getStatSavedEvents() { return $this->saved_events; }
-  public function getStatPageCount() { return $this->page_count; }
+  public function resetStats() {
+    $this->new_events = 0;
+    $this->modify_events = 0;
+    $this->saved_events = 0;
+    $this->created_events = 0;
+  }
+
+  public function getStatNewEvents() {
+    return $this->new_events;
+  }
+
+  public function getStatModifyEvents() {
+    return $this->modify_events;
+  }
+
+  public function getStatCreatedEvents() {
+    return $this->created_events;
+  }
+
+  public function getStatSavedEvents() {
+    return $this->saved_events;
+  }
+
+  public function getPageCount() {
+    return $this->page_count;
+  }
 
   /**
    * GoogleCalendarImport constructor.
@@ -128,11 +149,9 @@ class GoogleCalendarImportEvents {
 
     // init dummy page token
     $nextPageToken = NULL;
+
     // Stats
-    $this->new_events = 0;
-    $this->modify_events = 0;
-    $this->saved_events = 0;
-    $this->created_events = 0;
+    $this->resetStats();
 
     // Page count limit.
     $this->pageCount = 0;
@@ -256,7 +275,7 @@ class GoogleCalendarImportEvents {
       $indexedEvents[$event->getGoogleEventId()] = $event;
     }
 
-    $this->modify_events = +count($indexedEvents);
+    $this->modify_events += count($indexedEvents);
 
     // Iterate over events and update Drupal nodes accordingly
     foreach ($events as $event) {
