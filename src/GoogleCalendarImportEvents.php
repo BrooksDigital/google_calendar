@@ -181,7 +181,7 @@ class GoogleCalendarImportEvents {
     $this->config->save();
 
     $this->logger->info("Calendar: @calendar imported successfully.", [
-      '@calendar' => $calendar->label()
+      '@calendar' => $calendar->getName()
     ]);
 
     return $calendar;
@@ -313,36 +313,17 @@ class GoogleCalendarImportEvents {
 
       // Config fields
       $fields = [
-
-        'user_id' => [
-          'target_id' => $user_id,
-        ],
-
+        'user_id' => ['target_id' => $user_id],
         'name' => $event['summary'],
-
-        'event_id' => [
-          'value' => $event['id'],
-        ],
-
-        'ical_id' => [
-          'value' => $event['iCalUID'],
-        ],
+        'event_id' => ['value' => $event['id']],
+        'ical_id' => ['value' => $event['iCalUID']],
+        'calendar' => ['target_id' => $calendar->id()],
+        'start_date' => ['value' => $startDate],
+        'end_date' => ['value' => $endDate],
 
         'google_link' => [
           'uri' => $event['htmlLink'],
-          'utitleri' => $event['summary'],
-        ],
-
-        'calendar' => [
-          'target_id' => $calendar->id(),
-        ],
-
-        'start_date' => [
-          'value' => $startDate,
-        ],
-
-        'end_date' => [
-          'value' => $endDate,
+          'title' => $event['summary'],
         ],
 
         'description' => [
@@ -350,66 +331,21 @@ class GoogleCalendarImportEvents {
           'format' => 'basic_html',
         ],
 
-        'location' => [
-          'value' => $event['location'],
-        ],
-
-        'locked' => [
-          'value' => $event['locked'] ?? FALSE,
-        ],
-
-        'etag' => [
-          'value' => $event['etag'],
-        ],
-
-        'transparency' => [
-          'value' => $event['transparency'],
-        ],
-
-        'visibility' => [
-          'value' => $event['visibility'],
-        ],
-
-        'guests_invite_others' => [
-          'value' => $event['guestsCanInviteOthers'],
-        ],
-
-        'guests_modify' => [
-          'value' => $event['guestsCanModify'],
-        ],
-
-        'guests_see_invitees' => [
-          'value' => $event['guestsCanSeeOtherGuests'],
-        ],
-
-        'state' => [
-          'value' => $event['status'],
-        ],
-
-        'organizer' => [
-          'value' => $event['organizer']->displayName,
-        ],
-
-        'organizer_email' => [
-          'value' => $event['organizer']->email,
-        ],
-
-        'creator' => [
-          'value' => $event['creator']->displayName,
-        ],
-
-        'creator_email' => [
-          'value' => $event['creator']->email,
-        ],
-
-        'created' => [
-          'value' => $createdDate,
-        ],
-
-        'updated' => [
-          'value' => $updatedDate,
-        ],
-
+        'location' => ['value' => $event['location']],
+        'locked' => ['value' => $event['locked'] ?? FALSE],
+        'etag' => ['value' => $event['etag']],
+        'transparency' => ['value' => $event['transparency']],
+        'visibility' => ['value' => $event['visibility']],
+        'guests_invite_others' => ['value' => $event['guestsCanInviteOthers']],
+        'guests_modify' => ['value' => $event['guestsCanModify']],
+        'guests_see_invitees' => ['value' => $event['guestsCanSeeOtherGuests']],
+        'state' => ['value' => $event['status']],
+        'organizer' => ['value' => $event['organizer']->displayName],
+        'organizer_email' => ['value' => $event['organizer']->email],
+        'creator' => ['value' => $event['creator']->displayName],
+        'creator_email' => ['value' => $event['creator']->email],
+        'created' => ['value' => $createdDate],
+        'updated' => ['value' => $updatedDate],
       ];
 
 
