@@ -7,6 +7,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Url;
 use Drupal\user\UserInterface;
 
 /**
@@ -74,8 +75,38 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
   /**
    * {@inheritdoc}
    */
-  public function setName($name) {
+  protected function setName($name): GoogleCalendarEventInterface {
     $this->set('name', $name);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDescription() {
+    return $this->get('description')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setDescription($description): GoogleCalendarEventInterface {
+    $this->set('description', $description);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLocation() {
+    return $this->get('location')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setLocation($location): GoogleCalendarEventInterface {
+    $this->set('location', $location);
     return $this;
   }
 
@@ -89,7 +120,7 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
   /**
    * {@inheritdoc}
    */
-  public function setCreatedTime($timestamp) {
+  protected function setCreatedTime($timestamp): GoogleCalendarEventInterface  {
     $this->set('created', $timestamp);
     return $this;
   }
@@ -127,7 +158,112 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
   /**
    * {@inheritdoc}
    */
-  public function isPublished() {
+  public function getStartTime(): \DateTime {
+    return new \DateTime($this->get('start_time')->value);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setStartTime(\DateTime $start): GoogleCalendarEventInterface {
+    $this->set('start_time', $start->getTimestamp());
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEndTime(): \DateTime {
+    return new \DateTime($this->get('end_time')->value);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setEndTime(\DateTime $start): GoogleCalendarEventInterface {
+    $this->set('end_time', $start);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isEndTimeSpecified(): bool {
+    return !$this->get('end_unspecified')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setEndTimeSpecified(bool $specified): GoogleCalendarEventInterface {
+    $this->set('end_unspecified', !$specified);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function canGuestsInviteOthers(): bool {
+    return (bool) $this->get('guests_invite_others')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setGuestsInviteOthers(bool $yesno): GoogleCalendarEventInterface {
+    $this->set('guests_invite_others', $yesno ? TRUE : FALSE);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function canGuestsModifyEvent(): bool {
+    return (bool) $this->get('guest_modify')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setGuestsModifyEvent(bool $yesno): GoogleCalendarEventInterface {
+    $this->set('guest_modify', $yesno ? TRUE : FALSE);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function canGuestsSeeInvitees(): bool {
+    return (bool) $this->get('guests_see_invitees')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setGuestsSeeInvitees(bool $yesno): GoogleCalendarEventInterface {
+    $this->set('guests_see_invitees', $yesno ? TRUE : FALSE);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isLocked(): bool {
+    return (bool) $this->get('locked')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setLocked($locked) {
+    $this->set('locked', $locked ? TRUE : FALSE);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isPublished(): bool {
     return (bool) $this->getEntityKey('status');
   }
 
@@ -139,8 +275,25 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
     return $this;
   }
 
-  public function getGoogleEventId() {
+  /**
+   * {@inheritdoc}
+   */
+  public function getGoogleLink(): string {
+    return $this->get('google_link')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getGoogleEventId(): string {
     return $this->get('event_id')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getGoogleICalId(): string {
+    return $this->get('ical_id')->value;
   }
 
   /**
@@ -250,7 +403,7 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
       ->setLabel(t('Description'))
       ->setDescription(t('Long form description of the event.'))
       ->setSettings([
-        'max_length' => 255,
+        'max_length' => 2048,
         'text_processing' => 0,
       ])
       ->setDefaultValue('')
@@ -278,6 +431,7 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
         'type' => 'datetime_timestamp',
         'weight' => -4,
       ])
+      ->setReadOnly(TRUE)
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
@@ -294,6 +448,7 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
         'type' => 'datetime_timestamp',
         'weight' => -4,
       ])
+      ->setReadOnly(TRUE)
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
