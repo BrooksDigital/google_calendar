@@ -200,6 +200,7 @@ class GoogleCalendarImportEvents {
    *
    * @return bool|\Google_Service_Calendar_Events
    *
+   * @throws Google_Service_Exception
    * @see https://developers.google.com/calendar/v3/reference/events/list
    */
   private function getPage($calendarId, $syncToken, $pageToken = NULL) {
@@ -229,7 +230,7 @@ class GoogleCalendarImportEvents {
         $response = $this->getPage($calendarId, NULL);
       }
       else {
-        $response = FALSE;
+        throw $e;
       }
     }
 
@@ -262,14 +263,15 @@ class GoogleCalendarImportEvents {
 
     // Query to get list of existing events
     $query = $storage
-      ->getQuery('AND')
+      ->getQuery()
       ->condition('event_id', $eventIds, 'IN');
 
     $drupalEventIds = $query->execute();
 
+    /** @var \Drupal\google_calendar\Entity\GoogleCalendarEventInterface[] $drupalEvents */
     $drupalEvents = GoogleCalendarEvent::loadMultiple($drupalEventIds);
 
-    // Index the existing event nodes by Google Calendar Id for easier lookup
+    // Index the existing event nodes by Google Calendar Id for easier lookup.
     $indexedEvents = [];
     foreach ($drupalEvents as $event) {
       $indexedEvents[$event->getGoogleEventId()] = $event;
@@ -277,12 +279,13 @@ class GoogleCalendarImportEvents {
 
     $this->modify_events += count($indexedEvents);
 
-    // Iterate over events and update Drupal nodes accordingly
+    // Iterate over incoming events and update Drupal entities accordingly.
     foreach ($events as $event) {
-      // Get the event node
+
+      // Get the old entity, if it exists.
       $eventEntity = $indexedEvents[$event['id']] ?? NULL;
 
-      // Cutoff for deleted events
+      // If the API now states the event was cancelled, delete the entity.
       if ($event['status'] == 'cancelled') {
         if ($eventEntity) {
           // if event is cancelled and we have an associated event node, remove it
