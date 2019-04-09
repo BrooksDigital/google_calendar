@@ -23,6 +23,38 @@ use DateTimeZone;
  */
 class GoogleCalendarImportEvents {
 
+  // Handle dates: Google supplies values such as:
+  //   "2010-01-09T16:06:35.311Z"
+  // which is almost but not quite RFC3339/ISO8601: 3 digit fractional
+  // seconds is neither RFC3339_EXTENDED nor RFC3339 compatible,
+  // though it is a perfectly valid date representation.
+  //
+  //  ISO8601           'Y-m-d\TH:i:sO'  // no : in tz, secs
+  //  RFC3339           'Y-m-d\TH:i:sP'  // : in tz, secs
+  //  RFC3339_EXTENDED  'Y-m-d\TH:i:s.vP' // milliseconds
+  //
+  // Google API:
+  //  created timestamp:
+  //            "created": "2010-01-09T16:09:16.000Z",
+  //  updated timestamp:
+  //            "updated": "2019-03-29T20:01:48.229Z",
+  //  Start date:
+  //            "date": null,
+  //            "dateTime": "2019-04-11T10:45:00+01:00",
+  //            "timeZone": "Europe/London"
+  //  End date:
+  //            "date": null,
+  //            "dateTime": "2019-04-11T12:00:00+01:00",
+  //            "timeZone": "Europe/London"
+
+
+  // Format of dates coming From API:
+
+  // CRUD is used for created, updated timestamps, and has milliseconds in it.
+  protected const DATESTYLE_CRUD = "Y-m-d\TH:i:s.uP";
+  // WHEN is used for start, end times and has second (at most) granularity.
+  protected const DATESTYLE_WHEN = "Y-m-d\TH:i:sO";
+
   /**
    * @var int stats
    */
@@ -240,42 +272,13 @@ class GoogleCalendarImportEvents {
         continue;
       }
 
-      // Handle created or updated dates: Google supplies values such as
-      //   "2010-01-09T16:06:35.311Z"
-      // which is almost but not quite RFC3339/ISO8601: 3 digit fractional
-      // seconds is neither RFC3339_EXTENDED nor RFC3339 compatible,
-      // though it is a perfectly valid date representation.
-      //
-      // NB: Event dates are not stored with sub-second accuracy and so do
-      // not suffer this problem.
-      $createdDate = DateTime::createFromFormat("Y-m-d\TH:i:s.uP", $event['created']);
-      if (is_object($createdDate) && $createdDate->format('Y') > 1970) {
-        $createdDate = $createdDate->getTimestamp();
-      }
-      else {
-        $createdDate = 0;
-      }
-
-      $updatedDate = DateTime::createFromFormat("Y-m-d\TH:i:s.uP", $event['updated']);
-      if (is_object($updatedDate) && $updatedDate->format('Y') > 1970) {
-        $updatedDate = $updatedDate->getTimestamp();
-      }
-      else {
-        $updatedDate = 0;
-      }
-
-      // For start and end the 'date' value is set only when there is no time
-      // component for the event, so check 'date' first, then if not set get
-      // both date and time from 'dateTime'.
-      $startDate = $event['start']['date'] ?
-        new DateTime($event['start']['date'], new DateTimeZone($timezone))
-        : DateTime::createFromFormat(DateTime::ISO8601, $event['start']['dateTime']);
-      $startDate = $startDate->setTimezone(new DateTimeZone('UTC'))->getTimestamp();
-
-      $endDate = $event['end']['date'] ?
-        new DateTime($event['end']['date'], new DateTimeZone($timezone))
-        : DateTime::createFromFormat(DateTime::ISO8601, $event['end']['dateTime']);
-      $endDate = $endDate->setTimezone(new DateTimeZone('UTC'))->getTimestamp();
+      // Parse the CRUD event meta-dates.
+      $createdDate = $this->parseAPIDate($timezone, $event['created']);
+      $updatedDate = $this->parseAPIDate($timezone, $event['updated']);
+      
+      // Parse event start and end dates.
+      $startDate = $this->parseAPIDate($timezone, $event['start']);
+      $endDate = $this->parseAPIDate($timezone, $event['end']);
 
       // If possible, assign the drupal owner of this entity from the organiser email.
       $user_email = user_load_by_mail($event['organizer']->email);
@@ -412,6 +415,68 @@ class GoogleCalendarImportEvents {
                           '@created_events' => $this->created_events,
                           '@saved_events' => $this->saved_events,
                         ]);
+  }
+
+  /**
+   * Parse the user event dates.
+   *
+   * For start and end the 'date' value is set only when there is no time
+   * component for the event, so check 'date' first, then if not set get
+   * both date and time from 'dateTime'.
+   * 
+   * @param $timezone
+   *   A timezone specifier in a form suitable for \DateTimeZone().
+   * @param array $event
+   * @return int
+   *   Timestamp of the parsed date as Unix epoch seconds, UTC.
+   *
+   * @throws \InvalidArgumentException
+   *   If the date cannot be converted.
+   */
+  private function parseAPIDate($timezone, array $event) {
+    try {
+      if ($event['date']) {
+        $theDate = new DateTime($event['date'], new DateTimeZone($timezone));
+      }
+      else {
+        $theDate = DateTime::createFromFormat(self::DATESTYLE_WHEN, $event['dateTime']);
+      }
+      $theDate = $theDate->setTimezone(new DateTimeZone('UTC'))->getTimestamp();
+    }
+    catch (\Exception $e) {
+      throw new \InvalidArgumentException('Unable to parse date from event: ' . serialize($event), 0, $e);
+    }
+    return $theDate;
+  }
+
+  /**
+   * Parse the CRUD event meta-dates.
+   *
+   * The check for 1970 is because sometimes small integers are seen here,
+   * resulting in entity dates in 1970, which really messes things up later.
+   *
+   * @param string $event
+   * @return int
+   *   Timestamp of the parsed date as Unix epoch seconds, UTC.
+   *
+   * @throws \InvalidArgumentException
+   *   If the date cannot be converted.
+   */
+  private function parseCRUDDate(string $event) {
+    try {
+      $createdDate = DateTime::createFromFormat(self::DATESTYLE_CRUD, $event);
+      if (is_object($createdDate) && $createdDate->format('Y') > 1970) {
+        $theDate = $createdDate->getTimestamp();
+      }
+      else {
+        $theDate = 0;
+      }
+    }
+    catch (\Exception $e) {
+      throw new \InvalidArgumentException('Unable to parse date from event: ' . serialize($event), 0, $e);
+    }
+
+    return $theDate;
   }
 
 }
