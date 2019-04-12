@@ -34,8 +34,6 @@ class SettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Empty implementation of the abstract submit class.
 
-    $test = "test";
-
     $secret = $form_state->getValue('client_secret');
     $file = File::load( $secret[0] );
     $file->setPermanent();

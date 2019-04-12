@@ -4,7 +4,6 @@ namespace Drupal\google_calendar;
 
 
 use Drupal\Core\Config\ConfigFactory;
-use Drupal\node\Entity\Node;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 use Google_Client;
