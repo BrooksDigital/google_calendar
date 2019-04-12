@@ -33,9 +33,9 @@ function google_calendar_help($route_name, RouteMatchInterface $route_match) {
  * Queues calendars for import.
  */
 function google_calendar_cron() {
-  $queue = \Drupal::queue('google_calendar_import_processor');
+  $queue = Drupal::queue('google_calendar_import_processor');
 
-  $query = \Drupal::entityManager()
+  $query = Drupal::entityTypeManager()
     ->getStorage('google_calendar')
     ->getQuery()
     ->condition('status', 1);
@@ -56,7 +56,7 @@ function google_calendar_cron() {
 function google_calendar_entity_operation_alter(&$operations, EntityInterface $entity) {
   $info = $entity->getEntityType();
 
-  switch ($info->id()){
+  switch ($info->id()) {
     case 'google_calendar':
       $operations['import'] = [
         'title' => t('Import Events'),
@@ -74,7 +74,7 @@ function google_calendar_entity_operation_alter(&$operations, EntityInterface $e
  *
  * Makes the fields imported from google calendar read only.
  */
-function google_calendar_form_google_calendar_event_edit_form_alter(&$form, FormStateInterface $form_state, $form_id){
+function google_calendar_form_google_calendar_event_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
 
   $read_only = [
     'name',
@@ -86,7 +86,7 @@ function google_calendar_form_google_calendar_event_edit_form_alter(&$form, Form
   ];
 
   // These fields should be read-only
-  foreach($read_only as $field){
+  foreach ($read_only as $field) {
     $form[$field]['widget'][0]['value']['#attributes']['readonly'] = 'readonly';
   }
   // Extra for description field
