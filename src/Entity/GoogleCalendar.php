@@ -165,7 +165,7 @@ class GoogleCalendar extends ContentEntityBase implements GoogleCalendarInterfac
 
     $fields['calendar_id'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Google Calendar ID'))
-      ->setDescription(t('The ID of the calendar in google.  This can be obtained form the "Integrate Calendar" section of your calendar\'s settings.'))
+      ->setDescription(t('The ID of the calendar in google.  This can be obtained from the "Integrate Calendar" section of your calendar\'s settings.'))
       ->setSettings([
         'max_length' => 255,
         'text_processing' => 0,
