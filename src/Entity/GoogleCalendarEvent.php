@@ -33,7 +33,7 @@ use Drupal\user\UserInterface;
  *   },
  *   base_table = "google_calendar_event",
  *   data_table = "google_calendar_event_field_data",
- *   admin_permission = "administer google calendar event entities",
+ *   admin_permission = "administer google calendar events",
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "name",
