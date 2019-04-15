@@ -22,15 +22,15 @@ class GoogleCalendarEventAccessControlHandler extends EntityAccessControlHandler
     switch ($operation) {
       case 'view':
         if (!$entity->isPublished()) {
-          return AccessResult::allowedIfHasPermission($account, 'view unpublished google calendar event entities');
+          return AccessResult::allowedIfHasPermission($account, 'view unpublished google calendar events');
         }
-        return AccessResult::allowedIfHasPermission($account, 'view published google calendar event entities');
+        return AccessResult::allowedIfHasPermission($account, 'view published google calendar events');
 
       case 'update':
-        return AccessResult::allowedIfHasPermission($account, 'edit google calendar event entities');
+        return AccessResult::allowedIfHasPermission($account, 'edit google calendar events');
 
       case 'delete':
-        return AccessResult::allowedIfHasPermission($account, 'delete google calendar event entities');
+        return AccessResult::allowedIfHasPermission($account, 'delete google calendar events');
     }
 
     // Unknown operation, no opinion.
@@ -41,7 +41,7 @@ class GoogleCalendarEventAccessControlHandler extends EntityAccessControlHandler
    * {@inheritdoc}
    */
   protected function checkCreateAccess(AccountInterface $account, array $context, $entity_bundle = NULL) {
-    return AccessResult::allowedIfHasPermission($account, 'add google calendar event entities');
+    return AccessResult::allowedIfHasPermission($account, 'add google calendar events');
   }
 
 }
