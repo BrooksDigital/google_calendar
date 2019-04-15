@@ -33,7 +33,6 @@ use Drupal\user\UserInterface;
  *     }
  *   },
  *   base_table = "google_calendar_event",
- *   data_table = "google_calendar_event_field_data",
  *   admin_permission = "administer google calendar events",
  *   entity_keys = {
  *     "id" = "id",
@@ -392,11 +391,6 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
       ->setDescription(t('The calendar this event is part of.'))
       ->setSetting('target_type', 'google_calendar')
       ->setSetting('handler', 'default')
-      ->setDisplayOptions('view', array(
-        'label'  => 'hidden',
-        'type'   => 'google_calendar',
-        'weight' => 0,
-      ))
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['description'] = BaseFieldDefinition::create('text_long')
