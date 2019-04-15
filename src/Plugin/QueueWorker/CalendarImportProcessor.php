@@ -8,9 +8,12 @@
 
 namespace Drupal\google_calendar\Plugin\QueueWorker;
 
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Queue\QueueInterface;
 use Drupal\Core\Queue\QueueWorkerBase;
 use Drupal\google_calendar\GoogleCalendarImport;
+use Drupal\google_calendar\GoogleCalendarImportEvents;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 
@@ -25,16 +28,17 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class CalendarImportProcessor extends QueueWorkerBase implements ContainerFactoryPluginInterface {
 
   /**
-   * Drupal\google_calendar\GoogleCalendarImport definition.
+   * The importer class.
    *
-   * @var \Drupal\google_calendar\GoogleCalendarImport
+   * @var \Drupal\google_calendar\GoogleCalendarImportEvents
    */
   protected $calendarImport;
 
   /**
-   * constructor
+   * {@inheritdoc}
    */
-  public function __construct(GoogleCalendarImport $calendar_import) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, GoogleCalendarImportEvents $calendar_import) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->calendarImport = $calendar_import;
   }
 
@@ -42,8 +46,13 @@ class CalendarImportProcessor extends QueueWorkerBase implements ContainerFactor
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    /** @var \Drupal\google_calendar\GoogleCalendarImportEvents $importer */
+    $importer = $container->get('google_calendar.import_events');
     return new static(
-      $container->get('google_calendar.import_events')
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $importer
     );
   }
 
@@ -53,7 +62,5 @@ class CalendarImportProcessor extends QueueWorkerBase implements ContainerFactor
   public function processItem($calendar) {
     $this->calendarImport->import($calendar);
   }
-
-
 
 }

@@ -295,12 +295,12 @@ class GoogleCalendarImportEvents {
       }
 
       // Parse the CRUD event meta-dates.
-      $createdDate = $this->parseAPIDate($timezone, $event['created']);
-      $updatedDate = $this->parseAPIDate($timezone, $event['updated']);
-      
+      $createdDate = $this->parseMetaDate($event->created);
+      $updatedDate = $this->parseMetaDate($event->updated);
+
       // Parse event start and end dates.
-      $startDate = $this->parseAPIDate($timezone, $event['start']);
-      $endDate = $this->parseAPIDate($timezone, $event['end']);
+      $startDate = $this->parseEventDate($timezone, $event->start);
+      $endDate = $this->parseEventDate($timezone, $event->end);
 
       // If possible, assign the drupal owner of this entity from the organiser email.
       $user_email = user_load_by_mail($event['organizer']->email);
@@ -382,16 +382,16 @@ class GoogleCalendarImportEvents {
    * component for the event, so check 'date' first, then if not set get
    * both date and time from 'dateTime'.
    * 
-   * @param $timezone
+   * @param string $timezone
    *   A timezone specifier in a form suitable for \DateTimeZone().
-   * @param array $event
+   * @param \Google_Service_Calendar_EventDateTime $event
    * @return int
    *   Timestamp of the parsed date as Unix epoch seconds, UTC.
    *
    * @throws \InvalidArgumentException
    *   If the date cannot be converted.
    */
-  private function parseAPIDate($timezone, array $event) {
+  private function parseEventDate(string $timezone, \Google_Service_Calendar_EventDateTime $event) {
     try {
       if ($event['date']) {
         $theDate = new DateTime($event['date'], new DateTimeZone($timezone));
@@ -420,7 +420,7 @@ class GoogleCalendarImportEvents {
    * @throws \InvalidArgumentException
    *   If the date cannot be converted.
    */
-  private function parseCRUDDate(string $event) {
+  private function parseMetaDate(string $event) {
     try {
       $createdDate = DateTime::createFromFormat(self::DATESTYLE_CRUD, $event);
       if (is_object($createdDate) && $createdDate->format('Y') > 1970) {

@@ -7,7 +7,6 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Url;
 use Drupal\user\UserInterface;
 
 /**
@@ -457,6 +456,13 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
       ->setDescription(t('A boolean indicating that the end date/time was not specified.'))
       ->setReadOnly(TRUE)
       ->setDefaultValue(FALSE);
+
+    $fields['duration'] = BaseFieldDefinition::create('duration_iso8601')
+      ->setLabel(t('Duration'))
+      ->setDescription(t('The length of the event, or zero if "End Unspecified".'))
+      ->setReadOnly(TRUE)
+      ->setClass("")
+      ->setComputed(TRUE);
 
     $fields['etag'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Tag'))
