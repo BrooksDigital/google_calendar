@@ -2,16 +2,12 @@
 
 namespace Drupal\google_calendar;
 
-use DateTime;
-use DateTimeZone;
-
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 
 use Google_Client;
 use Google_Service_Calendar;
-use Drupal\user\Entity\User;
 use Google_Service_Exception;
 use Drupal\google_calendar\Entity\GoogleCalendar;
 use Drupal\google_calendar\Entity\GoogleCalendarEvent;
@@ -27,7 +23,6 @@ class GoogleCalendarImportCalendar {
    * @var \Google_Service_Calendar
    */
   protected $service;
-
 
   /**
    * Logger
@@ -49,7 +44,7 @@ class GoogleCalendarImportCalendar {
   protected $entityTypeManager;
 
   /**
-   * GoogleCalendarImport constructor.
+   * GoogleCalendarImportCalendar constructor.
    *
    * @param \Google_Client $googleClient
    * @param \Drupal\Core\Config\ConfigFactory $config
