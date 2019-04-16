@@ -24,9 +24,3 @@ google_calendar.admin.structure.import_all_events:
   description: 'Synchronise Calendar Events'
   route_name: google_calendar.import_all_events
   parent: entity.google_calendar.collection
-
-google_calendar_event.admin.structure.settings:
-  title: 'Event Settings'
-  description: 'Events Settings'
-  route_name: google_calendar_event.settings
-  parent: entity.google_calendar.collection
