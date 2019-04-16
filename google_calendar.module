@@ -35,14 +35,10 @@ function google_calendar_help($route_name, RouteMatchInterface $route_match) {
 function google_calendar_cron() {
   $queue = \Drupal::queue('google_calendar_import_processor');
 
-  $query = \Drupal::entityManager()
+  $foundCalendars = \Drupal::entityTypeManager()
     ->getStorage('google_calendar')
-    ->getQuery()
-    ->condition('status', 1);
+    ->loadByProperties(['status' => 1]);
 
-  $calendarIds = $query->execute();
-
-  $foundCalendars = GoogleCalendar::loadMultiple($calendarIds);
   foreach ($foundCalendars as $calendar) {
     $queue->createItem($calendar);
   }
