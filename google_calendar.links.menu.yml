@@ -15,7 +15,7 @@ google_calendar.admin.structure.settings:
 
 google_calendar.admin.structure.import_calendars:
   title: 'Import Calendars'
-  description: 'Import newly shared Google calendars'
+  description: 'Import new shared Google calendars'
   route_name: google_calendar.import_calendars
   parent: entity.google_calendar.collection
 

@@ -200,7 +200,7 @@ class GoogleCalendarCommands extends DrushCommands {
   public function import($calendar_id): PropertyList {
     $pl = [];
     /** @var \Drupal\google_calendar\GoogleCalendarImportEvents $importer */
-    $importer = \Drupal::service('google_calendar.import_events');
+    $importer = \Drupal::service('google_calendar.sync_events');
 
     if ($calendar_id) {
       /* Import this calendar */

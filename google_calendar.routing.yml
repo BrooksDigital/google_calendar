@@ -32,11 +32,11 @@ google_calendar.import_all_events:
   options:
     _admin_route: TRUE
 
-google_calendar.import_events:
+google_calendar.sync_events:
   path: '/admin/google-calendar/events/{google_calendar}/import'
   defaults:
     _controller: '\Drupal\google_calendar\Controller\GoogleCalendarImportEventsController::ImportCalendar'
-    _title: 'Import Events'
+    _title: 'Synchronize Events'
   requirements:
     _permission: 'manually sync calendar events'
   options:

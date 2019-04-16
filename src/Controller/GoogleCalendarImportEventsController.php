@@ -32,7 +32,7 @@ class GoogleCalendarImportEventsController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('google_calendar.import_events')
+      $container->get('google_calendar.sync_events')
     );
   }
 

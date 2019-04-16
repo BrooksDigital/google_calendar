@@ -38,7 +38,7 @@ class GoogleCalendarImportEventsForm extends FormBase {
 
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('google_calendar.import_events'),
+      $container->get('google_calendar.sync_events'),
       $container->get('entity_type.manager')
     );
   }
@@ -47,7 +47,7 @@ class GoogleCalendarImportEventsForm extends FormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'google_calendar_import_events_form';
+    return 'google_calendar_sync_events_form';
   }
 
   /**
@@ -56,7 +56,7 @@ class GoogleCalendarImportEventsForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form['actions']['submit'] = [
       '#type' => 'submit',
-      '#value' => t('Import Events'),
+      '#value' => t('Synchronize Events'),
     ];
 
     return $form;
@@ -75,7 +75,7 @@ class GoogleCalendarImportEventsForm extends FormBase {
   public static function handleBatchProcess($calendar, $total, &$context) {
     $name = $calendar->label();
     $context['message'] = "Imported Calendar: $name";
-    \Drupal::service('google_calendar.import_events')->import($calendar);
+    \Drupal::service('google_calendar.sync_events')->import($calendar);
   }
 
   public static function batchProcessCallback($success, $results, $operations) {

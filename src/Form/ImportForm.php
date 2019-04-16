@@ -56,7 +56,7 @@ class ImportForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form['actions']['submit'] = [
       '#type' => 'submit',
-      '#value' => t('Import Events'),
+      '#value' => t('Synchronize Events'),
     ];
 
     return $form;

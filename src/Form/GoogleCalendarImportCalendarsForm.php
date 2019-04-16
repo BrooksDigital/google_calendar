@@ -108,7 +108,7 @@ class GoogleCalendarImportCalendarsForm extends FormBase {
       elseif (in_array($id, $imported, TRUE)) {
         $links['sync'] = [
           'title' => $this->t('Sync Events'),
-          'url' => Url::fromRoute('google_calendar.import_events',
+          'url' => Url::fromRoute('google_calendar.sync_events',
                                   ['google_calendar' => $index[$id]->id()]),
         ];
       }

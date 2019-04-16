@@ -59,9 +59,9 @@ function google_calendar_entity_operation_alter(&$operations, EntityInterface $e
   switch ($info->id()){
     case 'google_calendar':
       $operations['import'] = array(
-        'title' => t('Import Events'),
+        'title' => t('Synchronize Events'),
         'weight' => 15,
-        'url' => Url::fromRoute("google_calendar.import_events", array(
+        'url' => Url::fromRoute("google_calendar.sync_events", array(
           'google_calendar' => $entity->id(),
         )),
       );
