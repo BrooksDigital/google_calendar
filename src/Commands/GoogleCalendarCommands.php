@@ -2,11 +2,14 @@
 
 namespace Drupal\google_calendar\Commands;
 
+use Drupal;
+
 use Consolidation\OutputFormatters\StructuredData\UnstructuredListData;
 use Drupal\google_calendar\GoogleClientFactory;
 use Drush\Commands\DrushCommands;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Consolidation\OutputFormatters\StructuredData\PropertyList;
+use Symfony\Component\Validator\Exception\MissingOptionsException;
 
 /**
  * For commands that are parts of modules, Drush expects to find commandfiles in
@@ -68,7 +71,7 @@ class GoogleCalendarCommands extends DrushCommands {
    */
   public function calendarList(): RowsOfFields {
     /** @var GoogleClientFactory $client_factory */
-    $client_factory = \Drupal::service('google_calendar.google_client.factory');
+    $client_factory = Drupal::service('google_calendar.google_client.factory');
     /** @var \Google_Client $client */
     $client = $client_factory->get();
 
@@ -122,9 +125,13 @@ class GoogleCalendarCommands extends DrushCommands {
    * @throws \Exception
    *   Exception if the Start or End dates are badly defined.
    */
-  public function eventList($calendar_id, $event_id = NULL, $options = ['format' => 'table', 'limit' => 20, 'raw' => FALSE]) {
+  public function eventList($calendar_id, $event_id = NULL, $options = [
+    'format' => 'table',
+    'limit' => 20,
+    'raw' => FALSE
+  ]) {
     /** @var GoogleClientFactory $client_factory */
-    $client_factory = \Drupal::service('google_calendar.google_client.factory');
+    $client_factory = Drupal::service('google_calendar.google_client.factory');
     $client = $client_factory->get();
 
     $service = new \Google_Service_Calendar($client);
@@ -144,7 +151,7 @@ class GoogleCalendarCommands extends DrushCommands {
     }
     else {
       $list = $service->events->listEvents($calendar_id, $optParams);
-      /** @var \Google_Service_Calendar_Events $items[] */
+      /** @var \Google_Service_Calendar_Events $items [] */
       $items = $list->getItems();
       print_r($items);
       if ($options['raw']) {
@@ -168,7 +175,7 @@ class GoogleCalendarCommands extends DrushCommands {
     $end = new \DateTime($end);
 
     $ev_id = $event->getId();
-    $entities = \Drupal::entityTypeManager()
+    $entities = Drupal::entityTypeManager()
       ->getStorage('google_calendar')
       ->loadByProperties(['status' => 1]);
 
@@ -200,18 +207,18 @@ class GoogleCalendarCommands extends DrushCommands {
   public function import($calendar_id): PropertyList {
     $pl = [];
     /** @var \Drupal\google_calendar\GoogleCalendarImportEvents $importer */
-    $importer = \Drupal::service('google_calendar.sync_events');
+    $importer = Drupal::service('google_calendar.sync_events');
 
     if ($calendar_id) {
       /* Import this calendar */
-      $entities = \Drupal::entityTypeManager()
+      $entities = Drupal::entityTypeManager()
         ->getStorage('google_calendar')
         ->loadByProperties(['calendar_id' => $calendar_id]);
       $pl['found'] = count($entities);
     }
     else {
       /* Import for all active calendars */
-      $entities = \Drupal::entityTypeManager()
+      $entities = Drupal::entityTypeManager()
         ->getStorage('google_calendar')
         ->loadByProperties(['status' => 1]);
       $pl['found'] = count($entities);
@@ -241,14 +248,14 @@ class GoogleCalendarCommands extends DrushCommands {
    *
    * @command gcal:secrets
    * @aliases gcal-getsecrets,gcal-secs
-   * @usage drush google_calendar:getsecrets
+   * @usage drush gcal:getsecrets
    *   Show what the configured secrets files contain.
    *
    * @return PropertyList
    */
   public function secrets(): PropertyList {
     /** @var \Drupal\google_calendar\GoogleCalendarSecretsFileInterface $credentials */
-    $credentials = \Drupal::service('google_calendar.secrets_file');
+    $credentials = Drupal::service('google_calendar.secrets_file');
     $filepath = $credentials->getFilePath();
 
     if (is_readable($filepath)) {
@@ -261,6 +268,78 @@ class GoogleCalendarCommands extends DrushCommands {
       return new PropertyList($pl);
     }
     throw new \UnexpectedValueException('Could not read managed secrets file: ' . $filepath);
+  }
+
+
+  /**
+   * Delete the events for a calendar or for all calendars.
+   *
+   * @command gcal:delete-events
+   * @aliases gcal-delevents,gcal-devt
+   *
+   * @param array $options
+   *
+   * @option events IDLIST
+   *   Delete specific events by entity id (whether published or not).
+   * @option all
+   *   Delete all published events, or when combined with --calendar, all in that calendar.
+   * @option calendar ID
+   *   Select the specific calendar to operate on. Use the calendar entity ID.
+   * @option dry-run
+   *   Indicate what would be deleted but do not delete anything.
+   * @option unpublished
+   *   As for 'all' but only unpublished events are included.
+   *
+   * @usage drush gcal-delevents --all
+   *   Delete all events for all calendars.
+   *
+   * @usage drush gcal-devt --unpublished --calendar=2
+   *   Delete all unpublished events for the calendar named My Calendar.
+   *
+   * @usage drush gcal-devt --events=45,220,5212 --calendar=2
+   *   Delete the specified events for the calendar 2.
+   *
+   * @return string
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  public function delete_events($options = [
+    'events' => NULL,
+    'calendar' => NULL,
+    'unpublished' => FALSE,
+    'all' => FALSE,
+    'dry-run' => FALSE
+  ]) {
+    if (is_string($options['events'])) {
+      // Delete these specific events
+      $eventlist = explode(',', $options['events']);
+      $eventlist = array_map('trim', $eventlist);
+//      print_r($eventlist);
+      /* Delete events in this calendar */
+      $entities = Drupal::entityTypeManager()
+        ->getStorage('google_calendar_event')
+        ->loadByProperties(['id' => $eventlist, 'calendar' => $options['calendar']]);
+      $pl['found'] = count($entities);
+    }
+    elseif (is_numeric($options['calendar'])) {
+      /* Delete events in this calendar */
+      $entities = Drupal::entityTypeManager()
+        ->getStorage('google_calendar_event')
+        ->loadByProperties(['status' => !$options['unpublished'], 'calendar' => $options['calendar']]);
+      $pl['found'] = count($entities);
+    }
+    elseif ($options['all'] || $options['unpublished']) {
+      /* Delete events in all active calendars */
+      $entities = Drupal::entityTypeManager()
+        ->getStorage('google_calendar_event')
+        ->loadByProperties(['status' => !$options['unpublished'], 'calendar' => $options['calendar']]);
+      $pl['found'] = count($entities);
+    }
+    else {
+      throw new MissingOptionsException('No entities specified, use --events or --all or --unpublished', ['all', 'events', 'unpublished']);
+    }
+    return 'Done ' . $pl['found'];
   }
 
 }

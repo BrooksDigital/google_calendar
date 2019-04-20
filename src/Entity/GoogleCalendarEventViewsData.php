@@ -16,7 +16,11 @@ class GoogleCalendarEventViewsData extends EntityViewsData {
     $data = parent::getViewsData();
 
     // Additional information for Views integration, such as table joins, can be
-    // put here.
+    // put here. Something like:
+//    $data['google_calendar_event']['table']['join']['google_calendar_field_data'] = [
+//      'left_field' => 'id',
+//      'field' => 'google_calendar',
+//    ];
 
     return $data;
   }
