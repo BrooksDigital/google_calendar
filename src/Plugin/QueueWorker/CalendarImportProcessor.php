@@ -10,7 +10,7 @@ namespace Drupal\google_calendar\Plugin\QueueWorker;
 
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\QueueWorkerBase;
-use Drupal\google_calendar\GoogleCalendarImport;
+use Drupal\google_calendar\GoogleCalendarImportEvents;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 
@@ -25,16 +25,26 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class CalendarImportProcessor extends QueueWorkerBase implements ContainerFactoryPluginInterface {
 
   /**
-   * Drupal\google_calendar\GoogleCalendarImport definition.
+   * Storage for the class which will actually process each item.
    *
-   * @var \Drupal\google_calendar\GoogleCalendarImport
+   * @var \Drupal\google_calendar\GoogleCalendarImportEvents
    */
   protected $calendarImport;
 
   /**
-   * constructor
+   * Constructs a CalendarImportProcessor.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param GoogleCalendarImportEvents $calendar_import
+   *   Class to perform the item processing.
    */
-  public function __construct(GoogleCalendarImport $calendar_import) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, GoogleCalendarImportEvents $calendar_import) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->calendarImport = $calendar_import;
   }
 
@@ -43,6 +53,9 @@ class CalendarImportProcessor extends QueueWorkerBase implements ContainerFactor
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
       $container->get('google_calendar.sync_events')
     );
   }
@@ -53,7 +66,5 @@ class CalendarImportProcessor extends QueueWorkerBase implements ContainerFactor
   public function processItem($calendar) {
     $this->calendarImport->import($calendar);
   }
-
-
 
 }

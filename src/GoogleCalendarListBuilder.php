@@ -39,7 +39,13 @@ class GoogleCalendarListBuilder extends EntityListBuilder {
       ->condition('calendar', $entity->id());
     $num = $query->count()->execute();
 
-    $last_synced = \Drupal::service('date.formatter')->format($entity->getLastSyncTime(), 'medium');
+    $lastsync_ts = $entity->getLastSyncTime();
+    if (is_numeric($lastsync_ts)) {
+      $last_synced = \Drupal::service('date.formatter')->format($lastsync_ts, 'medium');
+    }
+    else {
+      $last_synced = $this->t('Never');
+    }
 
     $row['name'] = Link::createFromRoute(
       $entity->label(),

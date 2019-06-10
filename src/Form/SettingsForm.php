@@ -98,22 +98,22 @@ class SettingsForm extends ConfigFormBase {
       '#type' => 'radio',
       '#title' => $this->t('Always set to the default.'),
       '#return_value' => 'fixed',
-      '#parents' => array('entity_ownership'),
-      '#default_value' => $entity_ownership == 'fixed' ?? NULL,
+      '#parents' => ['entity_ownership'],
+      '#default_value' => ($entity_ownership == 'fixed') ? 'fixed' : FALSE,
     ];
     $form['ownership']['entity_ownership']['by_email']['radio'] = [
       '#type' => 'radio',
       '#title' => $this->t('Derive from the Calendar event organizer\'s email address, otherwise use default.'),
       '#return_value' => 'by_email',
-      '#parents' => array('entity_ownership'),
-      '#default_value' => $entity_ownership == 'by_email' ?? NULL,
+      '#parents' => ['entity_ownership'],
+      '#default_value' => $entity_ownership == 'by_email' ? 'by_email' : FALSE,
     ];
     $form['ownership']['entity_ownership']['by_name']['radio'] = [
       '#type' => 'radio',
       '#title' => $this->t('Derive from the Calendar event organizer\'s name, otherwise use default.'),
       '#return_value' => 'by_name',
-      '#parents' => array('entity_ownership'),
-      '#default_value' => $entity_ownership == 'by_name' ?? NULL,
+      '#parents' => ['entity_ownership'],
+      '#default_value' => $entity_ownership == 'by_name' ? 'by_name' : FALSE,
     ];
 
     $form['ownership']['default_event_owner'] = [

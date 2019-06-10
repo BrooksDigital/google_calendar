@@ -136,21 +136,21 @@ class GoogleCalendar extends ContentEntityBase implements GoogleCalendarInterfac
   /**
    * {@inheritdoc}
    */
-  public function getGoogleCalendarId(){
+  public function getGoogleCalendarId() {
     return $this->get('calendar_id')->value;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getDescription(){
+  public function getDescription() {
     return $this->get('description')->value;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setDescription(string $desc){
+  public function setDescription(string $desc) {
     $this->set('description', $desc);
     return $this;
   }
@@ -158,14 +158,14 @@ class GoogleCalendar extends ContentEntityBase implements GoogleCalendarInterfac
   /**
    * {@inheritdoc}
    */
-  public function getLocation(){
+  public function getLocation() {
     return $this->get('location')->value;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setLocation(string $locn){
+  public function setLocation(string $locn) {
     $this->set('location', $locn);
     return $this;
   }
@@ -173,14 +173,14 @@ class GoogleCalendar extends ContentEntityBase implements GoogleCalendarInterfac
   /**
    * {@inheritdoc}
    */
-  public function getSyncResult(){
+  public function getSyncResult() {
     return $this->get('sync_result')->value;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setSyncResult(string $result){
+  public function setSyncResult(string $result) {
     $this->set('sync_result', $result);
     return $this;
   }
@@ -238,9 +238,9 @@ class GoogleCalendar extends ContentEntityBase implements GoogleCalendarInterfac
       ->setLabel(t('Name'))
       ->setDescription(t('The name of the Google Calendar entity.'))
       ->setSettings([
-        'max_length' => 50,
-        'text_processing' => 0,
-      ])
+                      'max_length' => 50,
+                      'text_processing' => 0,
+                    ])
       ->setDefaultValue('')
       ->setDisplayOptions('view', [
         'label' => 'above',
@@ -258,9 +258,9 @@ class GoogleCalendar extends ContentEntityBase implements GoogleCalendarInterfac
       ->setLabel(t('Description'))
       ->setDescription(t('The description of the Google Calendar entity.'))
       ->setSettings([
-        'max_length' => 255,
-        'text_processing' => 0,
-      ])
+                      'max_length' => 255,
+                      'text_processing' => 0,
+                    ])
       ->setDefaultValue('')
       ->setDisplayOptions('view', [
         'label' => 'above',
@@ -278,9 +278,9 @@ class GoogleCalendar extends ContentEntityBase implements GoogleCalendarInterfac
       ->setLabel(t('Location'))
       ->setDescription(t('The (default) location of the Google Calendar entity.'))
       ->setSettings([
-        'max_length' => 255,
-        'text_processing' => 0,
-      ])
+                      'max_length' => 255,
+                      'text_processing' => 0,
+                    ])
       ->setDefaultValue('')
       ->setDisplayOptions('view', [
         'label' => 'above',
@@ -296,12 +296,12 @@ class GoogleCalendar extends ContentEntityBase implements GoogleCalendarInterfac
 
     $fields['calendar_id'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Google Calendar ID'))
-      ->setDescription(t('The Google ID of the calendar. This can be obtained "
-          ."from the "Integrate Calendar" section of your calendar\'s settings.'))
+      ->setDescription(t('The Google ID of the calendar. This can be obtained '
+                         . 'from the "Integrate Calendar" section of your calendar\'s settings.'))
       ->setSettings([
-        'max_length' => 255,
-        'text_processing' => 0,
-      ])
+                      'max_length' => 255,
+                      'text_processing' => 0,
+                    ])
       ->setDefaultValue('')
       ->setDisplayOptions('view', [
         'label' => 'above',
