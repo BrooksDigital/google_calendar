@@ -1,5 +1,5 @@
 {
-  "name": "BrooksDigital/google_calendar",
+  "name": "brooks-digital/google_calendar",
   "type": "drupal-module",
   "description": "Provides an extensible integration with Google Calendar",
   "keywords": ["Drupal", "Google", "Calendar", "API", "Entity"],
