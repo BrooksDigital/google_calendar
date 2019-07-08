@@ -65,11 +65,6 @@ class GoogleCalendarImportEvents {
   protected $new_events = 0;
 
   /**
-   * @var int Maximum pages to import at once.
-   */
-  protected $maxPages = 2;
-
-  /**
    * Google Calendar service definition.
    *
    * @var \Google_Service_Calendar
@@ -172,7 +167,7 @@ class GoogleCalendarImportEvents {
         $this->syncEvents($items, $calendar, $googleCalendar->getTimeZone());
         $this->pageCount++;
       }
-    } while ($nextPageToken && $this->pageCount < $this->maxPages);
+    } while ($nextPageToken);
 
     //set sync token
     $this->config->set($configKey, $nextSyncToken);
@@ -211,14 +206,11 @@ class GoogleCalendarImportEvents {
     $opts = [
       'pageToken' => $pageToken,
       'singleEvents' => TRUE,  // expand recurring events into instances.
+      'showDeleted' => TRUE,
     ];
 
     if ($syncToken) {
       $opts['syncToken'] = $syncToken;
-    }
-    else {
-      $opts['orderBy'] = 'startTime';  // or 'updated'; 'startTime' requires 'singleEvents'=true
-      $opts['timeMin'] = date(DateTime::RFC3339, strtotime("-1 day"));
     }
 
     try {
