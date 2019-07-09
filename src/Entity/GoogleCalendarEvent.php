@@ -531,7 +531,9 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
         'type' => 'datetime_timestamp',
         'weight' => -4,
       ])
-      ->setReadOnly(TRUE);
+      ->setReadOnly(TRUE)
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
 
     $fields['creator'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Event creator'))
@@ -569,7 +571,9 @@ class GoogleCalendarEvent extends ContentEntityBase implements GoogleCalendarEve
         'type' => 'datetime_timestamp',
         'weight' => -4,
       ])
-      ->setReadOnly(TRUE);
+      ->setReadOnly(TRUE)
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
 
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
