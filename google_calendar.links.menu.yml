@@ -24,9 +24,3 @@ google_calendar.admin.structure.import_calendars:
   description: 'Import new shared Google calendars'
   route_name: google_calendar.import_calendars
   parent: entity.google_calendar.collection
-
-google_calendar.admin.structure.import_all_events:
-  title: 'Synchronize Calendars'
-  description: 'Synchronise Calendar Events'
-  route_name: google_calendar.import_all_events
-  parent: entity.google_calendar.collection
