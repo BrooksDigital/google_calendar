@@ -35,6 +35,12 @@ function google_calendar_help($route_name, RouteMatchInterface $route_match) {
 function google_calendar_cron() {
   $queue = \Drupal::queue('google_calendar_import_processor');
 
+  // Clear the queue in case an error occurrs that prevents a queue item from
+  // finishing. This prevents the queue from piling up with duplicate calendars
+  // in case there is a persistent error when importing a specific calendar.
+  $queue->deleteQueue();
+  $queue->createQueue();
+
   $foundCalendars = \Drupal::entityTypeManager()
     ->getStorage('google_calendar')
     ->loadByProperties(['status' => 1]);
