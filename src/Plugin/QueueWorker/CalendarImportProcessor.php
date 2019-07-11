@@ -64,7 +64,16 @@ class CalendarImportProcessor extends QueueWorkerBase implements ContainerFactor
    * {@inheritdoc}
    */
   public function processItem($calendar) {
-    $this->calendarImport->import($calendar);
+    // Only process a calendar if it exists in the database. This prevents a
+    // deleted calendar from having its events still imported if it exists in
+    // the queue.
+    $knownCalendars = \Drupal::entityTypeManager()
+      ->getStorage('google_calendar')
+      ->loadByProperties(['status' => 1]);
+
+    if (array_key_exists($calendar->id(), $knownCalendars)) {
+      $this->calendarImport->import($calendar);
+    }
   }
 
 }
