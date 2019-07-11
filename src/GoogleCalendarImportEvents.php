@@ -294,6 +294,12 @@ class GoogleCalendarImportEvents {
       $startDate = $this->parseAPIDate($timezone, $event->start);
       $endDate = $this->parseAPIDate($timezone, $event->end);
 
+      // Only import the event if it's within our import range, in the case of
+      // long-running recurring events.
+      if (!$this->timestampWithinRange($startDate) || !$this->timestampWithinRange($endDate)) {
+        continue;
+      }
+
       // If possible, assign the drupal owner of this entity from the organiser email.
       $user_email = user_load_by_mail($event['organizer']->email);
       if ($user_email) {
@@ -427,6 +433,24 @@ class GoogleCalendarImportEvents {
     }
 
     return $theDate;
+  }
+
+  /**
+   * Checks if a timestamp is within import range.
+   *
+   * Events can be imported from -6 months to +2 years from today.
+   *
+   * @param int $timestamp
+   *   A timestamp of an event's start or end date.
+   * @return bool
+   *   Whether or not the timestamp is within range.
+   */
+  private function timestampWithinRange(int $timestamp) {
+    if ($timestamp > strtotime('-6 months') && $timestamp < strtotime('+2 years')) {
+      return TRUE;
+    }
+
+    return FALSE;
   }
 
 }
